@@ -1,0 +1,28 @@
+name: Deploy Microservices
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Build Docker Images
+      run: |
+        chmod +x ./scripts/build-image.sh
+        ./scripts/build-image.sh
+
+    - name: Push Docker Images
+      run: |
+        echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        chmod +x ./scripts/push-image.sh
+        ./scripts/push-image.sh
+
+    - name: Deploy to Kubernetes
+      run: |
+        chmod +x ./scripts/deploy.sh
+        ./scripts/deploy.sh
